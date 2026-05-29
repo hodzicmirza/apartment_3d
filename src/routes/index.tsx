@@ -1,5 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Building3D } from "@/components/Building3D";
+import { lazy, Suspense, useEffect, useState } from "react";
+
+const Building3D = lazy(() =>
+  import("@/components/Building3D").then((m) => ({ default: m.Building3D }))
+);
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,5 +26,26 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return <Building3D />;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-sky-200 to-stone-200">
+        <div className="text-muted-foreground text-sm">Učitavam 3D prikaz…</div>
+      </div>
+    );
+  }
+
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-sky-200 to-stone-200">
+          <div className="text-muted-foreground text-sm">Učitavam 3D prikaz…</div>
+        </div>
+      }
+    >
+      <Building3D />
+    </Suspense>
+  );
 }
