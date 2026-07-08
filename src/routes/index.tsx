@@ -14,11 +14,11 @@ export const Route = createFileRoute("/")({
         content:
           "Istražite stanove u 3D prikazu zgrade. Kliknite na stan za detalje, cijenu i dostupnost.",
       },
-      { property: "og:title", content: "Rezidencija Vista · 3D zgrada" },
+      { property: "og:title", content: "Rezidencija Vista · Interaktivni 3D prikaz zgrade" },
       {
         property: "og:description",
         content:
-          "Interaktivni 3D model zgrade s klikabilnim stanovima i detaljima.",
+          "Istražite stanove u 3D prikazu zgrade. Kliknite na stan za detalje, cijenu i dostupnost.",
       },
     ],
   }),
