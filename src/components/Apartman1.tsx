@@ -1,93 +1,230 @@
 import * as THREE from 'three'
-import React, { useMemo } from 'react'
-import { useThree } from '@react-three/fiber'
+import { useMemo, useEffect } from 'react'
 import { useGLTF } from '@react-three/drei'
-import { RigidBody, CuboidCollider } from '@react-three/rapier'
+import { useThree } from '@react-three/fiber'
 import { KTX2Loader } from 'three-stdlib'
+import { RigidBody, CuboidCollider, MeshCollider } from '@react-three/rapier'
 
-// Inicijalizujemo KTX2 dekoder jednom globalno
-const ktx2Loader = new KTX2Loader().setTranscoderPath('https://cdn.jsdelivr.net/gh/pmndrs/drei-assets@master/basis/')
+const MODEL_URL = 'https://files.hodzicmirza.com/Apartman_final_kompresija_6-optimized.glb'
 
-export function Apartman1() {
+// Kreiranje KTX2 loadera na nivou modula kako bi radio i za prefetch/preload
+const ktx2Loader = new KTX2Loader()
+ktx2Loader.setTranscoderPath('https://cdn.jsdelivr.net/gh/mrdoob/three.js@r154/examples/jsm/libs/basis/')
+
+if (typeof window !== 'undefined') {
+  try {
+    const canvas = document.createElement('canvas')
+    const glContext = canvas.getContext('webgl2') || canvas.getContext('webgl')
+    if (glContext) {
+      const tempRenderer = new THREE.WebGLRenderer({ canvas, context: glContext })
+      ktx2Loader.detectSupport(tempRenderer)
+      tempRenderer.dispose()
+    }
+  } catch (e) {
+    console.warn("Failed to initialize temporary WebGLRenderer for KTX2 detection:", e)
+  }
+}
+
+interface Apartman1Props {
+  isDesktop?: boolean;
+}
+
+export function Apartman1({ isDesktop = true }: Apartman1Props) {
   const { gl } = useThree()
 
-  // Konektovanje KTX2 dekodera na tvoju grafičku kartu mora se odraditi PRIJE učitavanja modela
-  useMemo(() => {
-    ktx2Loader.detectSupport(gl)
-  }, [gl])
+  // Inicijalizacija GLTF modela sa Draco i KTX2 dekoderima
+  const { scene } = useGLTF(
+    MODEL_URL,
+    'https://www.gstatic.com/draco/versioned/decoders/1.5.5/',
+    true,
+    (loader) => {
+      ktx2Loader.detectSupport(gl)
+      loader.setKTX2Loader(ktx2Loader)
+    }
+  )
 
-  // Učitavanje modela
-  const { scene } = useGLTF('/Apartman_final_kompresija_4_compressed.glb', true, true, (loader) => {
-    loader.setKTX2Loader(ktx2Loader)
-  })
-
-  // Optimizovana vizuelna scena
+  // Konverzija u MeshLambertMaterial radi bržeg renderovanja + sjene samo na desktopu
   const visualScene = useMemo(() => {
-    const visual = scene.clone(true)
-    visual.traverse((node) => {
+    scene.traverse((node) => {
       if ((node as THREE.Mesh).isMesh) {
         const mesh = node as THREE.Mesh
-        mesh.castShadow = true
-        mesh.receiveShadow = true
+        mesh.castShadow = isDesktop
+        mesh.receiveShadow = isDesktop
+        
         if (mesh.material) {
           const mat = mesh.material as any
-          mesh.material = new THREE.MeshLambertMaterial({
-            color: mat.color, map: mat.map, transparent: mat.transparent, opacity: mat.opacity
-          })
+          
+          if (Array.isArray(mat)) {
+            mesh.material = mat.map((m) => new THREE.MeshLambertMaterial({
+              color: m.color,
+              map: m.map,
+              transparent: m.transparent,
+              opacity: m.opacity
+            }))
+          } else {
+            mesh.material = new THREE.MeshLambertMaterial({
+              color: mat.color,
+              map: mat.map,
+              transparent: mat.transparent,
+              opacity: mat.opacity
+            })
+          }
         }
       }
     })
-    return visual
-  }, [scene])
+    return scene
+  }, [scene, isDesktop])
 
-  // 🔥 Ručno izvlačenje SVAKOG MESH-a iz GLB fajla i pretvaranje u savršen Trimesh kolajder
+  // Generisanje kolizija - trimesh za zidove/podove, cuboid za namještaj, preskakanje dekoracija i plafona
   const colliders = useMemo(() => {
-    const items: JSX.Element[] = []
-    
+    const items: any[] = []
+    scene.updateMatrixWorld(true)
+
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh
-        if (!mesh.visible) return // Ignorišemo nevidljive objekte
-        
-        // 1. Izračunaj APSOLUTNU poziciju, rotaciju i skalu u svijetu
-        // Ovo rješava sve probleme sa offsetima koje je napravio kompresor!
+        if (!mesh.visible) return
+
+        // 1. Filtriranje dekorativnih i sitnih objekata (nema potrebe za kolajderima)
+        const name = (mesh.name || '').toLowerCase()
+
+        // Preskačemo plafone, tavan, krov, tepihe, kvake, šarke, zavjese, svjetla, utičnice, vješalice, jastuke i sitni dekor
+        const skipKeywords = [
+          'ceiling', 'plafon', 'tavan', 'roof', 'krov', 'top_',
+          'carpet', 'tepih', 'curtain', 'zavjes', 'light', 'svjet', 'lamp',
+          'socket', 'uticn', 'switch', 'prekidac', 'handle', 'kvak', 'latch',
+          'pillow', 'jastuk', 'blanket', 'pokrivac', 'dekor', 'vaza', 'vase',
+          'book', 'knjig', 'clutter', 'picture', 'slika', 'mirror', 'ogled',
+          'hanger', 'vjesa', 'throw', 'towel', 'peskir', 'faucet', 'mixer',
+          'joint', 'rubber', 'leg', 'radiaotr-power', 'radiator-logo', 'radiator-end'
+        ]
+
+        if (skipKeywords.some(key => name.includes(key))) {
+          return
+        }
+
+        // Izračunaj svjetske transformacije
         const position = new THREE.Vector3()
         const quaternion = new THREE.Quaternion()
         const scale = new THREE.Vector3()
         mesh.matrixWorld.decompose(position, quaternion, scale)
-        
-        // 2. Kreiramo izolovan trimesh kolajder za taj specifični objekat
-        items.push(
-          <RigidBody 
-            key={mesh.uuid} 
-            type="fixed" 
-            colliders="trimesh" 
-            position={position}
-            quaternion={quaternion}
-          >
-            <mesh geometry={mesh.geometry} scale={scale}>
-              <meshBasicMaterial visible={false} />
-            </mesh>
-          </RigidBody>
+
+        // Validacija geometrije
+        if (!mesh.geometry) return
+        if (!mesh.geometry.boundingBox) {
+          mesh.geometry.computeBoundingBox()
+        }
+        const localBox = mesh.geometry.boundingBox!
+
+        const size = new THREE.Vector3()
+        localBox.getSize(size)
+
+        const absScaleX = Math.abs(scale.x)
+        const absScaleY = Math.abs(scale.y)
+        const absScaleZ = Math.abs(scale.z)
+
+        const worldSize = new THREE.Vector3(
+          size.x * absScaleX,
+          size.y * absScaleY,
+          size.z * absScaleZ
         )
+
+        // 2. Klasifikacija kolajdera
+        // Zidovi, podovi i staklene pregrade moraju biti Trimesh kako bi igrač prolazio kroz otvore/vrata
+        const trimeshKeywords = [
+          'floor', 'pod', 'wall', 'zid', 'plane', 'door', 'fixed_door',
+          'frame', 'stok', 'window', 'prozor', 'glass', 'staklo', 'shower_tray', 'shower_wall'
+        ]
+
+        // Ako je naziv 'cube' i dimenzije odgovaraju zidu (visina preko 1.8m ili širina/dužina preko 2.0m),
+        // tretiramo ga kao Trimesh da bi se očuvale rupe za vrata.
+        const isWallLikeCube = name.includes('cube') && (worldSize.y > 1.8 || worldSize.x > 2.0 || worldSize.z > 2.0)
+        const isTrimesh = trimeshKeywords.some(key => name.includes(key)) || isWallLikeCube
+
+        if (isTrimesh) {
+          // Detektuj plafon i preskoči ga
+          // Ako je u pitanju horizontalni ravan objekat (Y skala je tanka) i visoko je pozicioniran, to je plafon/tavan
+          const worldYSize = worldSize.y
+          const worldMinY = position.y + localBox.min.y * scale.y
+          const worldMaxY = position.y + localBox.max.y * scale.y
+          
+          if (Math.min(worldMinY, worldMaxY) > 2.2 && worldYSize < 0.2) {
+            return
+          }
+
+          // Rješenje za negativne skale (mirroring) u Rapieru:
+          // Kloniramo geometriju i na nju direktno primjenjujemo transformacionu skalu stana,
+          // a u Rapier proslijeđujemo skalu [1, 1, 1] da izbjegnemo invertovanje normala trimesha.
+          const tempGeom = mesh.geometry.clone()
+          const scaleMatrix = new THREE.Matrix4().makeScale(scale.x, scale.y, scale.z)
+          tempGeom.applyMatrix4(scaleMatrix)
+
+          items.push(
+            <MeshCollider key={mesh.uuid} type="trimesh">
+              <mesh
+                geometry={tempGeom}
+                position={[position.x, position.y, position.z]}
+                quaternion={[quaternion.x, quaternion.y, quaternion.z, quaternion.w]}
+                scale={[1, 1, 1]}
+              >
+                <meshBasicMaterial visible={false} />
+              </mesh>
+            </MeshCollider>
+          )
+        } else {
+          // Skaliranje veličine bounding boxa prema apsolutnoj svjetskoj skali objekta (sprječava negativne extents)
+
+          const diagonal = worldSize.length()
+          // Preskačemo sve minijaturne elemente manje od 15cm
+          if (diagonal < 0.15) return
+
+          // Bounding box center za namještaj u svjetskom prostoru
+          const localCenter = new THREE.Vector3()
+          localBox.getCenter(localCenter)
+          
+          // Primijenjujemo originalni scale i rotaciju na centar da se ispravno pozicionira u svijetu
+          localCenter.multiply(scale).applyQuaternion(quaternion)
+          const worldCenter = position.clone().add(localCenter)
+          const halfExtents: [number, number, number] = [worldSize.x / 2, worldSize.y / 2, worldSize.z / 2]
+
+          items.push(
+            <CuboidCollider
+              key={mesh.uuid}
+              position={[worldCenter.x, worldCenter.y, worldCenter.z]}
+              quaternion={[quaternion.x, quaternion.y, quaternion.z, quaternion.w]}
+              args={halfExtents}
+            />
+          )
+        }
       }
     })
-    
     return items
   }, [scene])
 
   return (
     <group dispose={null}>
-      {/* Prikaz samog stana */}
+      {/* Prikaz optimizovane geometrije stana */}
       <primitive object={visualScene} />
 
-      {/* Individualni kolajderi izvučeni direktno iz matrice */}
-      {colliders}
+      {/* Jedan optimizovani compound fiksni rigid body za sve kolajdere */}
+      <RigidBody type="fixed" colliders={false}>
+        {colliders}
+      </RigidBody>
 
-      {/* Ogroman nevidljivi pod na dubini -0.5m za svaki slučaj, kao sigurnosna mreža */}
+      {/* Sigurnosna mreža na dubini -0.5m za svaki slučaj */}
       <RigidBody type="fixed" colliders={false}>
         <CuboidCollider position={[0, -0.5, 0]} args={[500, 0.5, 500]} />
       </RigidBody>
     </group>
   )
 }
+
+// Preload 3D modela sa Draco i KTX2 dekoderima
+useGLTF.preload(
+  MODEL_URL,
+  'https://www.gstatic.com/draco/versioned/decoders/1.5.5/',
+  true,
+  (loader) => {
+    loader.setKTX2Loader(ktx2Loader)
+  }
+)

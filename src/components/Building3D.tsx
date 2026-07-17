@@ -402,6 +402,7 @@ export function Building3D({ isFullscreen, onToggleFullscreen }: { isFullscreen?
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
+    setDpr(Math.min(window.devicePixelRatio, 1.5));
     let mounted = true;
     async function load() {
       const { data, error } = await supabase

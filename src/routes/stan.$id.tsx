@@ -32,9 +32,8 @@ function StanDetalji() {
       });
 
     // POZADINSKO UČITAVANJE (PRELOADING)
-    // Ovo "krišom" skida 36MB model u pozadini dok korisnik čita tekst o stanu.
-    // Kada klikne na 3D Turu, model je već na disku i učitava se instant!
-    fetch('/Apartman_final_compressed.glb').catch(() => {});
+    // Učitava model u pozadinski cache pretraživača dok korisnik čita podatke o stanu.
+    fetch('/Apartman_final_kompresija_6-optimized.glb').catch(() => { });
   }, [id]);
 
   if (loading) {
@@ -53,7 +52,7 @@ function StanDetalji() {
       <div className="min-h-screen bg-[#fafafa] flex items-center justify-center flex-col gap-6">
         <h1 className="text-3xl font-bold text-slate-800">Stan nije pronađen</h1>
         <Button asChild>
-          <Link href="/">Nazad na početnu</Link>
+          <Link to="/">Nazad na početnu</Link>
         </Button>
       </div>
     );
@@ -163,7 +162,7 @@ function StanDetalji() {
                 </div>
 
                 <div className="space-y-3 pt-4 border-t border-slate-100">
-                  <Button 
+                  <Button
                     onClick={() => {
                       setIsTransitioning(true);
                       setTimeout(() => {
@@ -182,7 +181,7 @@ function StanDetalji() {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-slate-900 p-8 rounded-3xl text-white shadow-xl">
               <h3 className="text-xl font-bold mb-4">Kontaktirajte Agenta</h3>
               <p className="text-slate-400 text-sm mb-6">Naš tim je tu da odgovori na sva vaša pitanja vezana za ovaj stan.</p>
@@ -195,7 +194,7 @@ function StanDetalji() {
           </div>
         </div>
       </main>
-      
+
       {/* Footer */}
       <footer className="bg-slate-900 py-12 mt-20 border-t border-slate-800">
         <div className="max-w-6xl mx-auto px-6 text-center">

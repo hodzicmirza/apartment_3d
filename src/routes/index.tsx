@@ -109,7 +109,7 @@ function LandingPage({ isSSR = false }: { isSSR?: boolean }) {
               
               <div className="grid md:grid-cols-3 gap-8">
                 {/* Primer Stan 1 */}
-                <Link to="/stan/7d87aaab-ebf3-4d04-9f5f-48930c3ff929" className="group block bg-slate-50 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300 ring-1 ring-slate-900/5 hover:-translate-y-1">
+                <Link to="/stan/$id" params={{ id: "7d87aaab-ebf3-4d04-9f5f-48930c3ff929" }} className="group block bg-slate-50 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300 ring-1 ring-slate-900/5 hover:-translate-y-1">
                   <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden">
                     <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Stan 1" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-slate-900">
