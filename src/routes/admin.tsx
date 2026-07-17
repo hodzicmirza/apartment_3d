@@ -148,9 +148,13 @@ function AdminPage() {
       <div className="min-h-[100dvh] flex items-center justify-center p-6 text-center">
         <div>
           <h1 className="text-xl font-semibold">Nemate admin pristup</h1>
-          <p className="text-sm text-muted-foreground mt-2">Administrator već postoji za ovaj projekat.</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Administrator već postoji za ovaj projekat.
+          </p>
           <div className="mt-4 flex gap-2 justify-center">
-            <Button asChild variant="outline"><Link to="/">Nazad</Link></Button>
+            <Button asChild variant="outline">
+              <Link to="/">Nazad</Link>
+            </Button>
             <Button onClick={signOut}>Odjava</Button>
           </div>
         </div>
@@ -170,7 +174,9 @@ function AdminPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm">
-              <Link to="/"><Home className="w-4 h-4" /></Link>
+              <Link to="/">
+                <Home className="w-4 h-4" />
+              </Link>
             </Button>
             <Button
               size="sm"
@@ -212,8 +218,13 @@ function AdminPage() {
                 </Badge>
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
-                {a.floor}. sprat · {a.side === "front" ? "prednji" : "zadnji"} · {a.rooms} sobe · {Number(a.area).toFixed(0)} m² ·{" "}
-                {new Intl.NumberFormat("hr-HR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(a.price))}
+                {a.floor}. sprat · {a.side === "front" ? "prednji" : "zadnji"} · {a.rooms} sobe ·{" "}
+                {Number(a.area).toFixed(0)} m² ·{" "}
+                {new Intl.NumberFormat("bs-BA", {
+                  style: "currency",
+                  currency: "BAM",
+                  maximumFractionDigits: 0,
+                }).format(Number(a.price))}
               </div>
             </div>
             <div className="flex gap-1 shrink-0">
@@ -244,10 +255,20 @@ function AdminPage() {
           </DialogHeader>
           {editing && (
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Broj"><Input value={editing.number ?? ""} onChange={(e) => setEditing({ ...editing, number: e.target.value })} /></Field>
+              <Field label="Broj">
+                <Input
+                  value={editing.number ?? ""}
+                  onChange={(e) => setEditing({ ...editing, number: e.target.value })}
+                />
+              </Field>
               <Field label="Status">
-                <Select value={editing.status} onValueChange={(v) => setEditing({ ...editing, status: v as any })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={editing.status}
+                  onValueChange={(v) => setEditing({ ...editing, status: v as any })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="available">Slobodan</SelectItem>
                     <SelectItem value="reserved">Rezerviran</SelectItem>
@@ -255,25 +276,93 @@ function AdminPage() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Naslov" full><Input value={editing.title ?? ""} onChange={(e) => setEditing({ ...editing, title: e.target.value })} /></Field>
-              <Field label="Opis" full><Textarea rows={2} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
-              <Field label="Sprat"><Input type="number" min={1} max={6} value={editing.floor ?? 1} onChange={(e) => setEditing({ ...editing, floor: Number(e.target.value) })} /></Field>
-              <Field label="Broj na spratu"><Input type="number" min={1} max={4} value={editing.unit_on_floor ?? 1} onChange={(e) => setEditing({ ...editing, unit_on_floor: Number(e.target.value) })} /></Field>
+              <Field label="Naslov" full>
+                <Input
+                  value={editing.title ?? ""}
+                  onChange={(e) => setEditing({ ...editing, title: e.target.value })}
+                />
+              </Field>
+              <Field label="Opis" full>
+                <Textarea
+                  rows={2}
+                  value={editing.description ?? ""}
+                  onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                />
+              </Field>
+              <Field label="Sprat">
+                <Input
+                  type="number"
+                  min={1}
+                  max={6}
+                  value={editing.floor ?? 1}
+                  onChange={(e) => setEditing({ ...editing, floor: Number(e.target.value) })}
+                />
+              </Field>
+              <Field label="Broj na spratu">
+                <Input
+                  type="number"
+                  min={1}
+                  max={4}
+                  value={editing.unit_on_floor ?? 1}
+                  onChange={(e) =>
+                    setEditing({ ...editing, unit_on_floor: Number(e.target.value) })
+                  }
+                />
+              </Field>
               <Field label="Strana">
-                <Select value={editing.side} onValueChange={(v) => setEditing({ ...editing, side: v as any })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={editing.side}
+                  onValueChange={(v) => setEditing({ ...editing, side: v as any })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="front">Prednja</SelectItem>
                     <SelectItem value="back">Zadnja</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Orijentacija"><Input value={editing.orientation ?? ""} onChange={(e) => setEditing({ ...editing, orientation: e.target.value })} /></Field>
-              <Field label="Sobe"><Input type="number" value={editing.rooms ?? 1} onChange={(e) => setEditing({ ...editing, rooms: Number(e.target.value) })} /></Field>
-              <Field label="Kupatila"><Input type="number" value={editing.bathrooms ?? 1} onChange={(e) => setEditing({ ...editing, bathrooms: Number(e.target.value) })} /></Field>
-              <Field label="Površina (m²)"><Input type="number" value={editing.area ?? 0} onChange={(e) => setEditing({ ...editing, area: Number(e.target.value) })} /></Field>
-              <Field label="Cijena (EUR)"><Input type="number" value={editing.price ?? 0} onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })} /></Field>
-              <Field label="Slika (URL)" full><Input value={editing.image_url ?? ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
+              <Field label="Orijentacija">
+                <Input
+                  value={editing.orientation ?? ""}
+                  onChange={(e) => setEditing({ ...editing, orientation: e.target.value })}
+                />
+              </Field>
+              <Field label="Sobe">
+                <Input
+                  type="number"
+                  value={editing.rooms ?? 1}
+                  onChange={(e) => setEditing({ ...editing, rooms: Number(e.target.value) })}
+                />
+              </Field>
+              <Field label="Kupatila">
+                <Input
+                  type="number"
+                  value={editing.bathrooms ?? 1}
+                  onChange={(e) => setEditing({ ...editing, bathrooms: Number(e.target.value) })}
+                />
+              </Field>
+              <Field label="Površina (m²)">
+                <Input
+                  type="number"
+                  value={editing.area ?? 0}
+                  onChange={(e) => setEditing({ ...editing, area: Number(e.target.value) })}
+                />
+              </Field>
+              <Field label="Cijena (KM)">
+                <Input
+                  type="number"
+                  value={editing.price ?? 0}
+                  onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })}
+                />
+              </Field>
+              <Field label="Slika (URL)" full>
+                <Input
+                  value={editing.image_url ?? ""}
+                  onChange={(e) => setEditing({ ...editing, image_url: e.target.value })}
+                />
+              </Field>
               <Field label="Karakteristike (odvojene zarezima)" full>
                 <Input
                   placeholder="Balkon, Parking, Klima"
@@ -284,8 +373,12 @@ function AdminPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Otkaži</Button>
-            <Button onClick={save} disabled={saving}>{saving ? "Čuvam…" : "Sačuvaj"}</Button>
+            <Button variant="outline" onClick={() => setEditing(null)}>
+              Otkaži
+            </Button>
+            <Button onClick={save} disabled={saving}>
+              {saving ? "Čuvam…" : "Sačuvaj"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -293,7 +386,15 @@ function AdminPage() {
   );
 }
 
-function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+function Field({
+  label,
+  children,
+  full,
+}: {
+  label: string;
+  children: React.ReactNode;
+  full?: boolean;
+}) {
   return (
     <div className={full ? "col-span-2" : ""}>
       <Label className="text-xs">{label}</Label>

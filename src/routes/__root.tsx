@@ -74,15 +74,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Rezidencija Vista · Interaktivni 3D prikaz zgrade" },
-      { name: "description", content: "Istražite stanove u 3D prikazu zgrade. Kliknite na stan za detalje, cijenu i dostupnost." },
-      { name: "author", content: "Lovable" },
+      {
+        name: "description",
+        content:
+          "Istražite stanove u 3D prikazu zgrade. Kliknite na stan za detalje, cijenu i dostupnost.",
+      },
+      { name: "author", content: "Rezidencija Vista" },
       { property: "og:title", content: "Rezidencija Vista · Interaktivni 3D prikaz zgrade" },
-      { property: "og:description", content: "Istražite stanove u 3D prikazu zgrade. Kliknite na stan za detalje, cijenu i dostupnost." },
+      {
+        property: "og:description",
+        content:
+          "Istražite stanove u 3D prikazu zgrade. Kliknite na stan za detalje, cijenu i dostupnost.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@RezidencijaVista" },
       { name: "twitter:title", content: "Rezidencija Vista · Interaktivni 3D prikaz zgrade" },
-      { name: "twitter:description", content: "Istražite stanove u 3D prikazu zgrade. Kliknite na stan za detalje, cijenu i dostupnost." },
+      {
+        name: "twitter:description",
+        content:
+          "Istražite stanove u 3D prikazu zgrade. Kliknite na stan za detalje, cijenu i dostupnost.",
+      },
     ],
     links: [
       {

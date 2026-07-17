@@ -52,19 +52,36 @@ function AuthPage() {
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-gradient-to-b from-sky-200 to-stone-200">
       <div className="w-full max-w-sm bg-background rounded-xl border border-border p-6 shadow-lg">
-        <Link to="/" className="text-xs text-muted-foreground hover:underline">← Nazad na zgradu</Link>
-        <h1 className="text-2xl font-bold mt-2">{mode === "signin" ? "Prijava" : "Registracija"}</h1>
+        <Link to="/" className="text-xs text-muted-foreground hover:underline">
+          ← Nazad na zgradu
+        </Link>
+        <h1 className="text-2xl font-bold mt-2">
+          {mode === "signin" ? "Prijava" : "Registracija"}
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Pristup admin panelu za upravljanje stanovima.
         </p>
         <form onSubmit={submit} className="mt-5 space-y-3">
           <div>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div>
             <Label htmlFor="password">Lozinka</Label>
-            <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input
+              id="password"
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Molim sačekajte…" : mode === "signin" ? "Prijavi se" : "Registruj se"}
