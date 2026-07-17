@@ -529,44 +529,46 @@ export function Building3D({ isFullscreen, onToggleFullscreen }: { isFullscreen?
         </div>
       )}
 
-      <Canvas
-        dpr={dpr}
-        camera={{ position: [8, 5, 10], fov: 50 }}
-        gl={{ antialias: false, powerPreference: "high-performance", alpha: false }}
-        style={{ touchAction: "none" }}
-      >
-        <color attach="background" args={["#bae6fd"]} />
-        <Suspense fallback={null}>
-          <PerformanceMonitor onIncline={() => setDpr(1)} onDecline={() => setDpr(0.5)} />
-          <Sky distance={450000} sunPosition={[10, 20, 10]} inclination={0} azimuth={0.25} />
+      {!tourMode && (
+        <Canvas
+          dpr={dpr}
+          camera={{ position: [8, 5, 10], fov: 50 }}
+          gl={{ antialias: false, powerPreference: "high-performance", alpha: false }}
+          style={{ touchAction: "none" }}
+        >
+          <color attach="background" args={["#bae6fd"]} />
+          <Suspense fallback={null}>
+            <PerformanceMonitor onIncline={() => setDpr(1)} onDecline={() => setDpr(0.5)} />
+            <Sky distance={450000} sunPosition={[10, 20, 10]} inclination={0} azimuth={0.25} />
 
-          <ambientLight intensity={0.55} />
-          <directionalLight
-            position={[10, 15, 8]}
-            intensity={1.4}
+            <ambientLight intensity={0.55} />
+            <directionalLight
+              position={[10, 15, 8]}
+              intensity={1.4}
 
-            shadow-mapSize-width={1024}
-            shadow-mapSize-height={1024}
-          />
-          <directionalLight position={[-8, 6, -5]} intensity={0.35} color="#fef3c7" />
+              shadow-mapSize-width={1024}
+              shadow-mapSize-height={1024}
+            />
+            <directionalLight position={[-8, 6, -5]} intensity={0.35} color="#fef3c7" />
 
-          <Zgrada stanovi={stanovi} onSelect={handleSelect} />
+            <Zgrada stanovi={stanovi} onSelect={handleSelect} />
 
-          <OrbitControls
-            enablePan={false}
-            enableZoom={!!isFullscreen}
-            enableDamping
-            dampingFactor={0.08}
-            minDistance={5}
-            maxDistance={22}
-            minPolarAngle={Math.PI / 6}
-            maxPolarAngle={Math.PI / 2.05}
-            autoRotate
-            autoRotateSpeed={0.4}
-            makeDefault
-          />
-        </Suspense>
-      </Canvas>
+            <OrbitControls
+              enablePan={false}
+              enableZoom={!!isFullscreen}
+              enableDamping
+              dampingFactor={0.08}
+              minDistance={5}
+              maxDistance={22}
+              minPolarAngle={Math.PI / 6}
+              maxPolarAngle={Math.PI / 2.05}
+              autoRotate
+              autoRotateSpeed={0.4}
+              makeDefault
+            />
+          </Suspense>
+        </Canvas>
+      )}
 
 
       {tourMode && (

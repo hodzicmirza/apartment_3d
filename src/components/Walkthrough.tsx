@@ -234,13 +234,13 @@ export function Walkthrough({ onClose }: { onClose: () => void }) {
         <Canvas
           dpr={dpr}
           shadows={!isMobile} // Sjene samo na desktop uređajima
-          camera={{ position: [5, 1.5, 3], fov: isMobile ? 85 : 75 }}
+          camera={{ position: [5, 1.5, 3], fov: isMobile ? 85 : 75, near: 0.1, far: 30 }}
           gl={{
             antialias: !isMobile,
             powerPreference: "high-performance",
             alpha: false,
             toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 1.1
+            toneMappingExposure: 0.85
           }}
           style={{ touchAction: "none" }}
         >
@@ -255,13 +255,20 @@ export function Walkthrough({ onClose }: { onClose: () => void }) {
 
             {/* Osvjetljenje i ambijent */}
             <Environment preset="city" background backgroundRotation={[0, Math.PI / 1.5, 0]} environmentRotation={[0, Math.PI / 1.5, 0]} />
-            <ambientLight intensity={0.2} />
+            <ambientLight intensity={0.12} />
             <directionalLight 
               position={[5, 10, 5]} 
-              intensity={0.6} 
+              intensity={0.45} 
               castShadow={!isMobile} 
-              shadow-mapSize-width={1024}
-              shadow-mapSize-height={1024}
+              shadow-mapSize-width={512}
+              shadow-mapSize-height={512}
+              shadow-camera-near={1}
+              shadow-camera-far={25}
+              shadow-camera-left={-10}
+              shadow-camera-right={10}
+              shadow-camera-top={10}
+              shadow-camera-bottom={-10}
+              shadow-bias={-0.0005}
             />
             <directionalLight position={[-5, 5, -5]} intensity={0.1} />
 

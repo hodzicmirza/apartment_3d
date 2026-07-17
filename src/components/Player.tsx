@@ -97,16 +97,21 @@ export function Player({ isMobile, moveState, onUnlock }: PlayerProps) {
       inputZ = moveState.z;
     }
 
-    const speed = 2.0;
-    const moveDirection = new THREE.Vector3(inputX, 0, inputZ).normalize().multiplyScalar(speed);
+    const speed = 3.0;
+    const targetVelocity = new THREE.Vector3(inputX, 0, inputZ).normalize().multiplyScalar(speed);
 
     // Rotiranje kretanja prema Y (Yaw) rotaciji kamere
     const euler = new THREE.Euler(0, camera.rotation.y, 0, "YXZ");
-    moveDirection.applyEuler(euler);
+    targetVelocity.applyEuler(euler);
 
     const currentVel = bodyRef.current.linvel();
+
+    // Linearna interpolacija (lerp) za glatko ubrzanje i usporavanje
+    const smoothVelX = THREE.MathUtils.lerp(currentVel.x, targetVelocity.x, 0.15);
+    const smoothVelZ = THREE.MathUtils.lerp(currentVel.z, targetVelocity.z, 0.15);
+
     bodyRef.current.setLinvel(
-      { x: moveDirection.x, y: currentVel.y, z: moveDirection.z },
+      { x: smoothVelX, y: currentVel.y, z: smoothVelZ },
       true
     );
 

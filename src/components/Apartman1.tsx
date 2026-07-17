@@ -11,19 +11,7 @@ const MODEL_URL = 'https://files.hodzicmirza.com/Apartman_final_kompresija_6-opt
 const ktx2Loader = new KTX2Loader()
 ktx2Loader.setTranscoderPath('https://cdn.jsdelivr.net/gh/mrdoob/three.js@r154/examples/jsm/libs/basis/')
 
-if (typeof window !== 'undefined') {
-  try {
-    const canvas = document.createElement('canvas')
-    const glContext = canvas.getContext('webgl2') || canvas.getContext('webgl')
-    if (glContext) {
-      const tempRenderer = new THREE.WebGLRenderer({ canvas, context: glContext })
-      ktx2Loader.detectSupport(tempRenderer)
-      tempRenderer.dispose()
-    }
-  } catch (e) {
-    console.warn("Failed to initialize temporary WebGLRenderer for KTX2 detection:", e)
-  }
-}
+
 
 interface Apartman1Props {
   isDesktop?: boolean;
@@ -45,29 +33,50 @@ export function Apartman1({ isDesktop = true }: Apartman1Props) {
 
   // Konverzija u MeshLambertMaterial radi bržeg renderovanja + sjene samo na desktopu
   const visualScene = useMemo(() => {
+    const materialCache = new Map<any, THREE.MeshLambertMaterial>()
+
     scene.traverse((node) => {
       if ((node as THREE.Mesh).isMesh) {
         const mesh = node as THREE.Mesh
-        mesh.castShadow = isDesktop
-        mesh.receiveShadow = isDesktop
+        
+        // Zidovi, podovi i plafoni ne trebaju bacati sjenu, samo primati!
+        if (isDesktop) {
+          const nameLower = (mesh.name || '').toLowerCase()
+          const isStructure = nameLower.includes('wall') || 
+                              nameLower.includes('floor') || 
+                              nameLower.includes('ceiling') || 
+                              nameLower.includes('plafon') || 
+                              nameLower.includes('zid') || 
+                              nameLower.includes('pod') ||
+                              nameLower.includes('glass') ||
+                              nameLower.includes('staklo')
+          mesh.castShadow = !isStructure
+          mesh.receiveShadow = true
+        } else {
+          mesh.castShadow = false
+          mesh.receiveShadow = false
+        }
         
         if (mesh.material) {
-          const mat = mesh.material as any
-          
-          if (Array.isArray(mat)) {
-            mesh.material = mat.map((m) => new THREE.MeshLambertMaterial({
+          const convertMaterial = (m: any) => {
+            if (materialCache.has(m)) {
+              return materialCache.get(m)!
+            }
+            const newMat = new THREE.MeshLambertMaterial({
               color: m.color,
               map: m.map,
               transparent: m.transparent,
               opacity: m.opacity
-            }))
-          } else {
-            mesh.material = new THREE.MeshLambertMaterial({
-              color: mat.color,
-              map: mat.map,
-              transparent: mat.transparent,
-              opacity: mat.opacity
             })
+            materialCache.set(m, newMat)
+            return newMat
+          }
+
+          const mat = mesh.material as any
+          if (Array.isArray(mat)) {
+            mesh.material = mat.map(convertMaterial)
+          } else {
+            mesh.material = convertMaterial(mat)
           }
         }
       }
@@ -219,12 +228,3 @@ export function Apartman1({ isDesktop = true }: Apartman1Props) {
   )
 }
 
-// Preload 3D modela sa Draco i KTX2 dekoderima
-useGLTF.preload(
-  MODEL_URL,
-  'https://www.gstatic.com/draco/versioned/decoders/1.5.5/',
-  true,
-  (loader) => {
-    loader.setKTX2Loader(ktx2Loader)
-  }
-)
