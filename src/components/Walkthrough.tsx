@@ -233,10 +233,10 @@ export function Walkthrough({ onClose }: { onClose: () => void }) {
       <KeyboardControls map={keyboardMap}>
         <Canvas
           dpr={dpr}
-          shadows={!isMobile} // Sjene samo na desktop uređajima
+          shadows={true}
           camera={{ position: [5, 1.5, 3], fov: isMobile ? 85 : 75, near: 0.1, far: 30 }}
           gl={{
-            antialias: !isMobile,
+            antialias: true,
             powerPreference: "high-performance",
             alpha: false,
             toneMapping: THREE.ACESFilmicToneMapping,
@@ -254,12 +254,12 @@ export function Walkthrough({ onClose }: { onClose: () => void }) {
             />
 
             {/* Osvjetljenje i ambijent */}
-            <Environment preset="city" background backgroundRotation={[0, Math.PI / 1.5, 0]} environmentRotation={[0, Math.PI / 1.5, 0]} />
+            <Environment preset="sunset" background backgroundRotation={[0, Math.PI / 1.5, 0]} environmentRotation={[0, Math.PI / 1.5, 0]} />
             <ambientLight intensity={0.12} />
             <directionalLight 
               position={[5, 10, 5]} 
               intensity={0.45} 
-              castShadow={!isMobile} 
+              castShadow={true} 
               shadow-mapSize-width={512}
               shadow-mapSize-height={512}
               shadow-camera-near={1}
@@ -274,7 +274,7 @@ export function Walkthrough({ onClose }: { onClose: () => void }) {
 
             {/* Fizikalni svijet stana i igrača */}
             <Physics>
-              <Apartman1 isDesktop={!isMobile} />
+              <Apartman1 isDesktop={true} />
               <Player 
                 isMobile={isMobile} 
                 moveState={moveState} 

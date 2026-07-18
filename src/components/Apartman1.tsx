@@ -5,7 +5,7 @@ import { useThree } from '@react-three/fiber'
 import { KTX2Loader } from 'three-stdlib'
 import { RigidBody, CuboidCollider, MeshCollider } from '@react-three/rapier'
 
-const MODEL_URL = 'https://files.hodzicmirza.com/Apartman_final_kompresija_6-optimized.glb'
+const MODEL_URL = 'https://files.hodzicmirza.com/Apartman_FINALNA_VERZIJA_1-optimized.glb'
 
 // Kreiranje KTX2 loadera na nivou modula kako bi radio i za prefetch/preload
 const ktx2Loader = new KTX2Loader()
