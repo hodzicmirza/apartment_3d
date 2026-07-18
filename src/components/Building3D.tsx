@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Html, Sky, PerformanceMonitor, useProgress } from "@react-three/drei";
+import { OrbitControls, Html, Environment, PerformanceMonitor, useProgress } from "@react-three/drei";
 import { useEffect, useMemo, useState, Suspense, memo, useCallback, useRef } from "react";
 import * as THREE from "three";
 import { apartmentsData } from "@/data/apartments";
@@ -486,23 +486,27 @@ export function Building3D({ isFullscreen, onToggleFullscreen }: { isFullscreen?
         <Canvas
           dpr={dpr}
           camera={{ position: [8, 5, 10], fov: 50 }}
-          gl={{ antialias: false, powerPreference: "high-performance", alpha: false }}
+          gl={{ 
+            antialias: false, 
+            powerPreference: "high-performance", 
+            alpha: false,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: 1.05
+          }}
           style={{ touchAction: "none" }}
         >
-          <color attach="background" args={["#bae6fd"]} />
           <Suspense fallback={null}>
             <PerformanceMonitor onIncline={() => setDpr(1)} onDecline={() => setDpr(0.5)} />
-            <Sky distance={450000} sunPosition={[10, 20, 10]} inclination={0} azimuth={0.25} />
+            <Environment preset="dawn" background backgroundRotation={[0, Math.PI / 1.5, 0]} environmentRotation={[0, Math.PI / 1.5, 0]} />
 
-            <ambientLight intensity={0.55} />
+            <ambientLight intensity={0.4} />
             <directionalLight
               position={[10, 15, 8]}
-              intensity={1.4}
-
+              intensity={1.1}
               shadow-mapSize-width={1024}
               shadow-mapSize-height={1024}
             />
-            <directionalLight position={[-8, 6, -5]} intensity={0.35} color="#fef3c7" />
+            <directionalLight position={[-8, 6, -5]} intensity={0.25} color="#fef3c7" />
 
             <Zgrada stanovi={stanovi} onSelect={handleSelect} />
 

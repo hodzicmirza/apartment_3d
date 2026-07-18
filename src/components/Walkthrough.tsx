@@ -254,7 +254,7 @@ export function Walkthrough({ onClose }: { onClose: () => void }) {
             />
 
             {/* Osvjetljenje i ambijent */}
-            <Environment preset="sunset" background backgroundRotation={[0, Math.PI / 1.5, 0]} environmentRotation={[0, Math.PI / 1.5, 0]} />
+            <Environment preset="dawn" background backgroundRotation={[0, Math.PI / 1.5, 0]} environmentRotation={[0, Math.PI / 1.5, 0]} />
             <ambientLight intensity={0.12} />
             <directionalLight 
               position={[5, 10, 5]} 

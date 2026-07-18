@@ -170,17 +170,20 @@ function StanDetalji() {
     <div className="relative min-h-screen bg-[#fafafa] text-slate-900 font-sans selection:bg-slate-900 selection:text-white">
       <VistaLoader loading={isTransitioning} />
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-5 bg-white border-b border-slate-100 sticky top-0 z-40">
-        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
+      <nav className="flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 sm:py-5 bg-white border-b border-slate-100 sticky top-0 z-40">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
+          <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shrink-0">
             <Building2 className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-lg tracking-wide uppercase text-slate-900">Rezidencija Vista</span>
+          <span className="font-bold text-xs sm:text-base md:text-lg tracking-wide uppercase text-slate-900 whitespace-nowrap">
+            Rezidencija Vista
+          </span>
         </Link>
-        <Button asChild variant="outline" className="rounded-full gap-2">
+        <Button asChild variant="outline" className="rounded-full gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10">
           <Link to="/">
-            <ArrowLeft className="w-4 h-4" />
-            Nazad na početnu
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Nazad na početnu</span>
+            <span className="inline sm:hidden">Nazad</span>
           </Link>
         </Button>
       </nav>
