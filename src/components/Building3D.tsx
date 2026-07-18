@@ -2,8 +2,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, Sky, PerformanceMonitor, useProgress } from "@react-three/drei";
 import { useEffect, useMemo, useState, Suspense, memo, useCallback, useRef } from "react";
 import * as THREE from "three";
-import { Link } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { apartmentsData } from "@/data/apartments";
 import { Walkthrough } from "./Walkthrough";
 import {
   Dialog,
@@ -403,54 +402,8 @@ export function Building3D({ isFullscreen, onToggleFullscreen }: { isFullscreen?
 
   useEffect(() => {
     setDpr(Math.min(window.devicePixelRatio, 1.5));
-    let mounted = true;
-    async function load() {
-      const { data, error } = await supabase
-        .from("apartments")
-        .select("*")
-        .order("floor", { ascending: true })
-        .order("side", { ascending: true })
-        .order("unit_on_floor", { ascending: true });
-      if (!mounted) return;
-      if (error) console.error(error);
-      setStanovi((data as any) ?? []);
-      setUcitavanje(false);
-    }
-    load();
-
-    const channel = supabase
-      .channel("apartments-changes")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "apartments" },
-        (payload) => {
-          const updated = payload.new as Apartment;
-          setStanovi((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
-          setIzabraniStan((prev) => (prev?.id === updated.id ? updated : prev));
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "apartments" },
-        (payload) => {
-          const inserted = payload.new as Apartment;
-          setStanovi((prev) => [...prev, inserted]);
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "apartments" },
-        (payload) => {
-          const deletedId = payload.old.id;
-          setStanovi((prev) => prev.filter((a) => a.id !== deletedId));
-          setIzabraniStan((prev) => (prev?.id === deletedId ? null : prev));
-        },
-      )
-      .subscribe();
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
-    };
+    setStanovi(apartmentsData as Apartment[]);
+    setUcitavanje(false);
   }, []);
 
   const handleSelect = useCallback((a: Apartment) => {

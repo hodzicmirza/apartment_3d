@@ -8,6 +8,44 @@ export type Database = {
   };
   public: {
     Tables: {
+      inquiries: {
+        Row: {
+          id: string;
+          apartment_id: string | null;
+          name: string;
+          phone: string;
+          email: string | null;
+          message: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          apartment_id?: string | null;
+          name: string;
+          phone: string;
+          email?: string | null;
+          message?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          apartment_id?: string | null;
+          name?: string;
+          phone?: string;
+          email?: string | null;
+          message?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_apartment_id_fkey";
+            columns: ["apartment_id"];
+            isOneToOne: false;
+            referencedRelation: "apartments";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       apartments: {
         Row: {
           area: number;
